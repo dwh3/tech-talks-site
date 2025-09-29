@@ -1,0 +1,49 @@
+site_name: Tech Talks
+site_description: Biweekly technical lectures with code, slides, and recordings.
+site_url: https://dwh3.github.io/tech-talks-site/
+repo_url: https://github.com/dwh3/tech-talks-site
+repo_name: dwh3/tech-talks-site
+
+
+theme:
+  name: material
+  language: en
+  logo: images/logo.svg
+  features:
+    - content.code.copy
+    - navigation.sections
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: indigo
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: indigo
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Schedule: schedule.md
+  - Talks:
+      - Overview: talks/index.md
+      - "Intro to Gradient Boosting (Aug 12, 2025)": talks/2025-11-04-llm-101.md

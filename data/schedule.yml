@@ -1,0 +1,6 @@
+upcoming:
+  - title: "LLM 101: Prompting Fundamentals"
+    date: 2025-11-04
+    slug: "2025-11-04-llm-101"
+    speakers: ["Jane Doe"]
+    status: "scheduled"
