@@ -47,11 +47,12 @@ extra_css:
 
 extra_javascript:
   - assets/countdown.js
+  - assets/suggest.js
 
 nav:
   - Home: index.md
   - Schedule: schedule.md
   - Improvements: improvements.md
+  - Suggest a Topic: suggest.md
   - Talks:
       - "New L&D Format Kickoff (Nov 4, 2025)": talks/2025-11-04-new-ld-format.md
-

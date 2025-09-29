@@ -10,9 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://dwh3.github.io/tech-talks-site/talks/">
+        <link rel="canonical" href="https://dwh3.github.io/tech-talks-site/suggest/">
       
       
+        <link rel="prev" href="../improvements/">
+      
+      
+        <link rel="next" href="../talks/2025-11-04-new-ld-format/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -20,7 +24,7 @@
     
     
       
-        <title>Past Lectures - Tech Talks</title>
+        <title>Suggest a Topic - Tech Talks</title>
       
     
     
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#past-lectures" class="md-skip">
+        <a href="#suggest-a-topic" class="md-skip">
           Skip to content
         </a>
       
@@ -109,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Past Lectures
+              Suggest a Topic
             
           </span>
         </div>
@@ -311,10 +315,19 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../suggest/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -325,6 +338,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -379,7 +393,7 @@
   
   
     <li class="md-nav__item">
-      <a href="2025-11-04-new-ld-format/" class="md-nav__link">
+      <a href="../talks/2025-11-04-new-ld-format/" class="md-nav__link">
         
   
   
@@ -446,9 +460,33 @@
   
 
 
-<h1 id="past-lectures">Past Lectures<a class="headerlink" href="#past-lectures" title="Permanent link">&para;</a></h1>
-<p>Explore previous sessions and resources.</p>
-<p><em>No archived talks yet. Check back soon.</em></p>
+<h1 id="suggest-a-topic">Suggest a Topic<a class="headerlink" href="#suggest-a-topic" title="Permanent link">&para;</a></h1>
+<p>We welcome ideas for future Learning &amp; Development sessions. Share a topic below and the L&amp;D team will review it.</p>
+<form id="suggest-form" class="suggest-form" novalidate>
+  <div class="field">
+    <label for="sf-name">Your name (optional)</label>
+    <input id="sf-name" name="name" type="text" maxlength="80" autocomplete="name">
+  </div>
+  <div class="field">
+    <label for="sf-email">Email (optional, so we can follow up)</label>
+    <input id="sf-email" name="email" type="email" maxlength="120" autocomplete="email">
+  </div>
+  <div class="field required">
+    <label for="sf-topic">Topic title *</label>
+    <input id="sf-topic" name="topic" type="text" maxlength="140" required>
+  </div>
+  <div class="field required">
+    <label for="sf-details">What would you love to see covered? *</label>
+    <textarea id="sf-details" name="details" rows="6" maxlength="1500" required></textarea>
+  </div>
+  <p class="help">We use a secure, third-party form endpoint so you don't need a GitHub account. No data is stored on this site.</p>
+  <button type="submit">Send suggestion</button>
+  <p id="sf-status" class="status" role="status" aria-live="polite"></p>
+</form>
+
+<blockquote>
+<p><strong>Setup required:</strong> Replace <code>FORM_ENDPOINT_URL</code> in <code>docs/assets/suggest.js</code> with your provider's POST URL (e.g., a <a href="https://formspree.io/">Formspree</a> form). Providers like Formspree or StaticForms handle spam filtering and sanitize submissions server-side, protecting against SQL injection and related attacks.</p>
+</blockquote>
 
 
 

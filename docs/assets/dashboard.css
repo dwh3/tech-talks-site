@@ -58,3 +58,57 @@ section.dashboard .section-title h2 { margin: 0 0 .5rem 0; }
 .next-talk .talk-title { margin: .25rem 0 .25rem 0; }
 .countdown { margin-top: .5rem; }
 .countdown .cd-out { font-variant-numeric: tabular-nums; }
+.suggest-form {
+  max-width: 32rem;
+  margin-top: 1.5rem;
+}
+
+.suggest-form .field {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.suggest-form label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.suggest-form input,
+.suggest-form textarea {
+  padding: 0.5rem;
+  border: 1px solid var(--md-default-fg-color--light, #ccc);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.suggest-form button {
+  background: var(--md-primary-fg-color, #1565c0);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.suggest-form button:hover,
+.suggest-form button:focus {
+  background: var(--md-primary-fg-color--light, #1e88e5);
+}
+
+.suggest-form .help {
+  font-size: 0.85rem;
+  color: var(--md-default-fg-color--light, #666);
+}
+
+.status {
+  margin-top: 0.75rem;
+}
+
+.status.success {
+  color: #1b5e20;
+}
+
+.status.error {
+  color: #b71c1c;
+}
