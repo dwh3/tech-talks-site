@@ -1,0 +1,6 @@
+﻿site/
+__pycache__/
+*.pyc
+
+# Local test artifacts
+/tmp/
