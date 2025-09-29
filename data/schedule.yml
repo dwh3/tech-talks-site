@@ -1,6 +1,72 @@
-upcoming:
-  - title: "LLM 101: Prompting Fundamentals"
+﻿upcoming:
+  - title: "New L&D Format Kickoff"
     date: 2025-11-04
-    slug: "2025-11-04-llm-101"
-    speakers: ["Jane Doe"]
+    time: "14:00"
+    duration: 60
+    slug: "2025-11-04-new-ld-format"
+    speakers:
+      - name: "David Hummel"
+        bio: "Learning & Development facilitator"
+    topics:
+      - "Program overview"
+      - "Q&A on the new cadence"
+    tags: ["Learning", "Development", "All"]
     status: "scheduled"
+    
+  - title: "Advanced SQL Optimization"
+    date: 2025-11-18
+    time: "14:00"
+    duration: 45
+    slug: "2025-11-18-sql-optimization"
+    speakers:
+      - name: "John Smith"
+        bio: "Data Platform Lead"
+        avatar: "images/speakers/john-smith.jpg"
+    topics:
+      - "Query execution plans"
+      - "Index strategies"
+      - "Performance monitoring"
+    tags: ["SQL", "Performance", "Intermediate"]
+    status: "scheduled"
+
+past:
+  - title: "Building REST APIs with FastAPI"
+    date: 2025-07-29
+    slug: "2025-07-29-fastapi"
+    speakers:
+      - name: "Maria Garcia"
+        bio: "Backend Engineer"
+    thumbnail: "images/talks/fastapi-thumb.jpg"
+    tags: ["Python", "API", "Backend", "Beginner"]
+    recording_url: "https://recordings.example.com/fastapi-2025"
+    
+  - title: "Data Visualization Best Practices"
+    date: 2025-07-15
+    slug: "2025-07-15-dataviz"
+    speakers:
+      - name: "Tom Wilson"
+        bio: "Analytics Lead"
+    thumbnail: "images/talks/dataviz-thumb.jpg"
+    tags: ["Visualization", "Design", "Beginner"]
+    
+  - title: "Kubernetes for Data Scientists"
+    date: 2025-07-01
+    slug: "2025-07-01-k8s"
+    speakers:
+      - name: "Sarah Lee"
+        bio: "DevOps Engineer"
+    thumbnail: "images/talks/k8s-thumb.jpg"
+    tags: ["Kubernetes", "DevOps", "Advanced"]
+
+stats:
+  total_talks: 24
+  total_speakers: 18
+  topics:
+    - name: "Machine Learning"
+      count: 8
+    - name: "Data Engineering"
+      count: 6
+    - name: "Backend Development"
+      count: 5
+    - name: "Analytics"
+      count: 5

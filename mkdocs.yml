@@ -1,9 +1,8 @@
-site_name: Tech Talks
+﻿site_name: Tech Talks
 site_description: Biweekly technical lectures with code, slides, and recordings.
 site_url: https://dwh3.github.io/tech-talks-site/
 repo_url: https://github.com/dwh3/tech-talks-site
 repo_name: dwh3/tech-talks-site
-
 
 theme:
   name: material
@@ -37,13 +36,22 @@ markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
   - pymdownx.inlinehilite
-
+  
 plugins:
   - search
+  - macros:
+      module_name: macros
+
+extra_css:
+  - assets/dashboard.css
+
+extra_javascript:
+  - assets/countdown.js
 
 nav:
   - Home: index.md
   - Schedule: schedule.md
+  - Improvements: improvements.md
   - Talks:
-      - Overview: talks/index.md
-      - "Intro to Gradient Boosting (Aug 12, 2025)": talks/2025-11-04-llm-101.md
+      - "New L&D Format Kickoff (Nov 4, 2025)": talks/2025-11-04-new-ld-format.md
+
