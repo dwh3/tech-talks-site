@@ -2,6 +2,7 @@
   - title: "New L&D Format Kickoff"
     date: 2025-11-04
     time: "14:00"
+    timezone: "America/New_York"
     duration: 60
     slug: "2025-11-04-new-ld-format"
     speakers:
@@ -12,10 +13,18 @@
       - "Q&A on the new cadence"
     tags: ["Learning", "Development", "All"]
     status: "scheduled"
-    
+    abstract: "An overview of the refreshed Learning & Development rhythm, goals, and how the team can contribute."
+    outline:
+      - "Why we are evolving the program"
+      - "Cadence, tracks, and expected outcomes"
+      - "How to pitch and prepare sessions"
+    resources:
+      agenda: "https://example.com/ld-format-agenda.pdf"
+
   - title: "Advanced SQL Optimization"
     date: 2025-11-18
     time: "14:00"
+    timezone: "America/New_York"
     duration: 45
     slug: "2025-11-18-sql-optimization"
     speakers:
@@ -28,35 +37,75 @@
       - "Performance monitoring"
     tags: ["SQL", "Performance", "Intermediate"]
     status: "scheduled"
+    abstract: "Techniques for squeezing the most performance out of complex analytical workloads on PostgreSQL."
+    outline:
+      - "Reading and comparing execution plans"
+      - "Index design trade-offs"
+      - "Monitoring and alerting patterns"
+    resources:
+      slides: "https://example.com/sql-optimization-slides.pdf"
+      repo: "https://github.com/example/sql-optimization-demos"
 
 past:
   - title: "Building REST APIs with FastAPI"
     date: 2025-07-29
+    time: "13:00"
+    timezone: "America/New_York"
     slug: "2025-07-29-fastapi"
     speakers:
       - name: "Maria Garcia"
         bio: "Backend Engineer"
     thumbnail: "images/talks/fastapi-thumb.jpg"
     tags: ["Python", "API", "Backend", "Beginner"]
+    abstract: "How we ship production-ready APIs in weeks using FastAPI, Pydantic, and async tooling."
+    outline:
+      - "Project scaffolding"
+      - "Validation with Pydantic"
+      - "Async patterns"
+    resources:
+      slides: "https://example.com/fastapi-slides.pdf"
+      repo: "https://github.com/example/fastapi-template"
     recording_url: "https://recordings.example.com/fastapi-2025"
-    
+
   - title: "Data Visualization Best Practices"
     date: 2025-07-15
+    time: "11:00"
+    timezone: "America/New_York"
     slug: "2025-07-15-dataviz"
     speakers:
       - name: "Tom Wilson"
         bio: "Analytics Lead"
     thumbnail: "images/talks/dataviz-thumb.jpg"
     tags: ["Visualization", "Design", "Beginner"]
-    
+    topics: ["Storytelling", "Dashboards"]
+    abstract: "Principles for building dashboards that land with stakeholders."
+    outline:
+      - "Understanding the question"
+      - "Choosing the right chart"
+      - "Improving accessibility"
+    resources:
+      slides: "https://example.com/dataviz-deck.pdf"
+      checklist: "https://example.com/dataviz-checklist"
+
   - title: "Kubernetes for Data Scientists"
     date: 2025-07-01
+    time: "10:00"
+    timezone: "America/New_York"
     slug: "2025-07-01-k8s"
     speakers:
       - name: "Sarah Lee"
         bio: "DevOps Engineer"
     thumbnail: "images/talks/k8s-thumb.jpg"
     tags: ["Kubernetes", "DevOps", "Advanced"]
+    abstract: "Running reproducible ML workloads on Kubernetes without drowning in YAML."
+    outline:
+      - "K8s basics for ML"
+      - "Batch vs. real-time"
+      - "Tooling and automation"
+    resources:
+      slides: "https://example.com/k8s-datascience.pdf"
+      repo: "https://github.com/example/k8s-ml-starter"
+    recording_url: "https://recordings.example.com/k8s-2025"
 
 stats:
   total_talks: 24

@@ -4,3 +4,4 @@ __pycache__/
 
 # Local test artifacts
 /tmp/
+docs/_generated/

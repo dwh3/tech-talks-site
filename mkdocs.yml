@@ -36,11 +36,14 @@ markdown_extensions:
   - pymdownx.highlight
   - pymdownx.superfences
   - pymdownx.inlinehilite
-  
+
 plugins:
   - search
   - macros:
       module_name: macros
+
+hooks:
+  - hooks.py
 
 extra_css:
   - assets/dashboard.css
