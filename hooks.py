@@ -1,9 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import shutil
 import warnings
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
 import yaml
 from mkdocs.structure.files import File
@@ -14,40 +14,42 @@ GENERATED_TALKS: Dict[str, macros.Talk] = {}
 GENERATED_DIR_NAME = "_generated"
 
 
-def _clean_front_matter(data: Dict[str, Optional[object]]) -> Dict[str, object]:
-    return {key: value for key, value in data.items() if value not in (None, [], {}, "")}
+def _clean_front_matter(payload: Dict[str, object]) -> Dict[str, object]:
+    return {key: value for key, value in payload.items() if value not in (None, [], {}, "")}
 
 
 def _format_speakers(talk: macros.Talk) -> str:
     if talk.speaker_details:
-        parts = []
+        segments = []
         for entry in talk.speaker_details:
             name = entry.get("name")
             bio = entry.get("bio")
             if name and bio:
-                parts.append(f"{name} - {bio}")
+                segments.append(f"{name} — {bio}")
             elif name:
-                parts.append(str(name))
-        if parts:
-            return "<br/>".join(parts)
+                segments.append(str(name))
+        if segments:
+            return "<br/>".join(segments)
     return ", ".join(talk.speakers)
 
 
-def _render_resources(talk: macros.Talk) -> Optional[str]:
+def _render_resources(talk: macros.Talk) -> str:
     items = []
     for label, href in sorted((talk.resources or {}).items()):
-        if href:
-            title = label.replace("_", " ").title()
-            items.append(f"- [{title}]({href})")
-    if talk.recording_url:
-        items.append(f"- [Recording]({talk.recording_url})")
-    return "\n".join(items) if items else None
+        if not href:
+            continue
+        title = label.replace("_", " ").title()
+        items.append(f"- [{title}]({href})")
+    if not items:
+        items.append("Resources will be posted after the session.")
+    return "\n".join(items)
 
 
-def _render_outline(talk: macros.Talk) -> Optional[str]:
-    if not talk.outline:
-        return None
-    return "\n".join(f"- {item}" for item in talk.outline)
+def _render_outline(talk: macros.Talk) -> str:
+    outline = talk.outline or []
+    if not outline:
+        return "- Session outline will be published soon."
+    return "\n".join(f"- {item}" for item in outline)
 
 
 def _build_markdown(talk: macros.Talk) -> str:
@@ -69,30 +71,28 @@ def _build_markdown(talk: macros.Talk) -> str:
 
     lines = ["---", header, "---", "", f"# {talk.title}", ""]
     lines.append(f"**Date:** {macros._format_date(talk)}")
+    tz_display = talk.timezone or "UTC"
     if talk.time or talk.timezone:
-        tz_display = talk.timezone or "UTC"
         lines.append(f"**Time:** {macros._format_time(talk)} ({tz_display})")
-    if talk.speakers:
-        lines.append(f"**Speakers:** {', '.join(talk.speakers)}")
-    if talk.topics or talk.tags:
-        topics = talk.topics or talk.tags
+    lines.append(f"**Speakers:** {', '.join(talk.speakers) if talk.speakers else 'TBA'}")
+    topics = talk.topics or talk.tags
+    if topics:
         lines.append(f"**Topics:** {', '.join(topics)}")
     lines.append("")
 
-    abstract = talk.abstract or "Details coming soon."
-    lines.extend(["## Abstract", abstract, ""])
+    lines.extend(["## Abstract", talk.abstract or "Details coming soon.", ""])
+    lines.extend(["## Outline", _render_outline(talk), ""])
+    lines.extend(["## Resources", _render_resources(talk), ""])
 
-    outline_block = _render_outline(talk)
-    if outline_block:
-        lines.extend(["## Outline", outline_block, ""])
+    if talk.recording_url:
+        recording_body = f"[Watch the recording]({talk.recording_url})"
+    else:
+        recording_body = "Recording will be shared once available."
+    lines.extend(["## Recording", recording_body, ""])
 
-    resources_block = _render_resources(talk)
-    if resources_block:
-        lines.extend(["## Resources", resources_block, ""])
-
-    speakers_block = _format_speakers(talk)
-    if speakers_block and speakers_block != ", ".join(talk.speakers):
-        lines.extend(["## Speaker Bios", speakers_block, ""])
+    speaker_bios = _format_speakers(talk)
+    if talk.speaker_details and speaker_bios and speaker_bios != ", ".join(talk.speakers):
+        lines.extend(["## Speaker Bios", speaker_bios, ""])
 
     return "\n".join(lines).strip() + "\n"
 
@@ -106,7 +106,7 @@ def on_files(files, config):
     if generated_root.exists():
         shutil.rmtree(generated_root)
 
-    # Drop any previously generated files discovered during the initial scan
+    # Remove any items from a previous run before regenerating
     for file in list(files):
         if file.src_path.startswith(f"{GENERATED_DIR_NAME}/"):
             files.remove(file)
@@ -116,9 +116,8 @@ def on_files(files, config):
         if not talk.slug:
             continue
         src_path = f"talks/{talk.slug}.md"
-        manual_exists = any(file.src_path == src_path for file in files)
         manual_path = docs_dir / Path(src_path)
-        if manual_exists or manual_path.exists():
+        if manual_path.exists():
             continue
 
         content = _build_markdown(talk)

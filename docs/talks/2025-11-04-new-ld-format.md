@@ -6,17 +6,33 @@ timezone: "America/New_York"
 speakers:
   - name: "David Hummel"
     title: "Learning & Development Lead"
-level: "All"
-tags: ["Learning", "Development"]
+    org: "NYSIF"
+tags: ["Learning", "Development", "All"]
 status: "planned"
+resources:
+  agenda: "https://example.com/ld-format-agenda.pdf"
 ---
 
 # New L&D Format Kickoff
 
-We're debuting the refreshed Learning & Development session structure. Agenda and resources will be posted as they're finalized.
+**Date:** November 04, 2025
+**Time:** 14:00 (America/New_York)
+**Speakers:** David Hummel
+**Topics:** Learning, Development, All
 
 ## Abstract
-TBD
+We're debuting the refreshed Learning & Development session structure. Agenda and resources will be posted as they're finalized.
 
 ## Outline
-1. TBD
+- Why we are evolving the program
+- Cadence, tracks, and expected outcomes
+- How to pitch and prepare sessions
+
+## Resources
+- [Agenda](https://example.com/ld-format-agenda.pdf)
+
+## Recording
+Recording will be shared once available.
+
+## Speaker Bios
+David Hummel — Learning & Development Lead

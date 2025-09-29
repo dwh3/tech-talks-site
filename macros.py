@@ -1,9 +1,9 @@
 ﻿import re
 from dataclasses import dataclass, field
+from datetime import datetime, time as dtime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from datetime import datetime, time as dtime, timezone
-from zoneinfo import ZoneInfo
+
 import yaml
 
 ROOT = Path(__file__).resolve().parent
@@ -14,7 +14,6 @@ SCHEDULE_PATHS = [
     ROOT / "schedule.yml",
 ]
 
-# En dash used in some time ranges (e.g., 12:00–13:00)
 TIME_SEP = "\u2013"
 
 
@@ -38,14 +37,18 @@ class Talk:
     recording_url: Optional[str] = None
     status: Optional[str] = None
 
-    # computed fields
     dt: Optional[datetime] = None
     iso_start: Optional[str] = None
     date_str: Optional[str] = None
     time_str: Optional[str] = None
 
 
-def _safe_zone(tz: Optional[str]) -> ZoneInfo:
+def _safe_zone(tz: Optional[str]):
+    try:
+        from zoneinfo import ZoneInfo
+    except Exception:  # pragma: no cover
+        return timezone.utc
+
     try:
         return ZoneInfo(tz) if tz else ZoneInfo("UTC")
     except Exception:
@@ -55,7 +58,7 @@ def _safe_zone(tz: Optional[str]) -> ZoneInfo:
 def _parse_time_window(raw: Optional[str]) -> dtime:
     if not raw:
         return dtime(0, 0)
-    text = raw.strip()
+    text = str(raw).strip()
     if TIME_SEP in text:
         text = text.split(TIME_SEP, 1)[0]
     elif "-" in text:
@@ -67,16 +70,16 @@ def _parse_time_window(raw: Optional[str]) -> dtime:
 def _mk_dt(date_str: Optional[str], time_str: Optional[str], tz_str: Optional[str]) -> Optional[datetime]:
     if not date_str:
         return None
-    parsed_time = _parse_time_window(time_str)
     try:
         year, month, day = (int(part) for part in str(date_str).split("-"))
     except Exception:
         return None
+    parsed_time = _parse_time_window(time_str)
     try:
-        tzinfo = _safe_zone(tz_str)
-        return datetime(year, month, day, parsed_time.hour, parsed_time.minute, tzinfo=tzinfo)
+        tz = _safe_zone(tz_str)
     except Exception:
-        return None
+        tz = None
+    return datetime(year, month, day, parsed_time.hour, parsed_time.minute, tzinfo=tz)
 
 
 def _load_yaml(path: Path) -> Any:
@@ -115,16 +118,21 @@ def _normalise_outline(raw: Any) -> List[str]:
 
 def _collect_resources(item: Dict[str, Any]) -> Dict[str, str]:
     resources: Dict[str, str] = {}
-    res_block = item.get("resources")
-    if isinstance(res_block, dict):
-        for key, value in res_block.items():
+    block = item.get("resources")
+    if isinstance(block, dict):
+        for key, value in block.items():
             if value:
                 resources[key] = str(value)
-    # legacy keys
-    for key in ("slides_url", "notebook_url", "repo", "repo_url"):
+    legacy_keys = {
+        "slides_url": "slides",
+        "notebook_url": "notebook",
+        "repo": "repo",
+        "repo_url": "repo",
+    }
+    for key, label in legacy_keys.items():
         value = item.get(key)
         if value:
-            resources[key.replace("_url", "")] = str(value)
+            resources[label] = str(value)
     return resources
 
 
@@ -144,12 +152,15 @@ def _read_schedule() -> List[Talk]:
         if not schedule_path.exists():
             continue
         data = _load_yaml(schedule_path) or {}
+        sections: Dict[str, List[Dict[str, Any]]] = {}
         if isinstance(data, list):
             sections = {"mixed": data}
-        else:
-            sections = {key: value or [] for key, value in data.items() if isinstance(value, list)}
-        for section_name in ("upcoming", "past", "mixed"):
-            for item in sections.get(section_name, []):
+        elif isinstance(data, dict):
+            for key, value in data.items():
+                if isinstance(value, list):
+                    sections[key] = value
+        for section in ("upcoming", "past", "mixed"):
+            for item in sections.get(section, []):
                 if not isinstance(item, dict):
                     continue
                 names, details = _normalise_speakers(item.get("speakers") or item.get("speaker"))
@@ -227,7 +238,7 @@ def _read_talk_pages() -> List[Talk]:
 def _merge_schedule_and_pages(schedule_talks: List[Talk], page_talks: List[Talk]) -> List[Talk]:
     by_slug: Dict[str, Talk] = {talk.slug: talk for talk in page_talks if talk.slug}
     merged: List[Talk] = []
-    seen_slugs: set[str] = set()
+    seen: set = set()
     for talk in schedule_talks:
         if talk.slug and talk.slug in by_slug:
             page_talk = by_slug[talk.slug]
@@ -251,14 +262,13 @@ def _merge_schedule_and_pages(schedule_talks: List[Talk], page_talks: List[Talk]
                 status=page_talk.status or talk.status,
             )
             merged.append(combined)
-            seen_slugs.add(talk.slug)
+            seen.add(talk.slug)
         else:
             merged.append(talk)
             if talk.slug:
-                seen_slugs.add(talk.slug)
-    # include pages that are not referenced in the schedule (likely legacy posts)
+                seen.add(talk.slug)
     for talk in page_talks:
-        if talk.slug and talk.slug in seen_slugs:
+        if talk.slug and talk.slug in seen:
             continue
         merged.append(talk)
     return merged
@@ -291,24 +301,25 @@ def _build() -> Dict[str, Any]:
     page_talks = _read_talk_pages()
     talks = [_decorate(talk) for talk in _merge_schedule_and_pages(schedule_talks, page_talks)]
 
-    def sort_key_future(item: Talk) -> datetime:
+    now = datetime.now(timezone.utc)
+
+    def future_key(item: Talk) -> datetime:
         return item.dt or datetime.max.replace(tzinfo=timezone.utc)
 
-    def sort_key_past(item: Talk) -> datetime:
+    def past_key(item: Talk) -> datetime:
         return item.dt or datetime.min.replace(tzinfo=timezone.utc)
 
-    now = datetime.now(timezone.utc)
-    upcoming = sorted([talk for talk in talks if talk.dt and talk.dt >= now], key=sort_key_future)
-    past = sorted([talk for talk in talks if talk.dt and talk.dt < now], key=sort_key_past, reverse=True)
+    upcoming = sorted([talk for talk in talks if talk.dt and talk.dt >= now], key=future_key)
+    past = sorted([talk for talk in talks if talk.dt and talk.dt < now], key=past_key, reverse=True)
 
-    next_talk = upcoming[0] if upcoming else (sorted(talks, key=sort_key_future)[0] if talks else None)
+    next_talk = upcoming[0] if upcoming else (sorted(talks, key=future_key)[0] if talks else None)
 
     delivered = len(past)
     speaker_names = {name for talk in upcoming for name in talk.speakers if name}
     tag_counts: Dict[str, int] = {}
     for talk in talks:
-        for tag in talk.tags or []:
-            tag_counts[tag] = tag_counts.get(tag, 0) + 1
+        for bucket in (talk.tags or []):
+            tag_counts[bucket] = tag_counts.get(bucket, 0) + 1
         for topic in talk.topics or []:
             tag_counts[topic] = tag_counts.get(topic, 0) + 1
     top_tag = max(tag_counts, key=tag_counts.get) if tag_counts else "N/A"
@@ -328,7 +339,6 @@ def _build() -> Dict[str, Any]:
 
 
 def get_schedule_data() -> Dict[str, Any]:
-    """Expose schedule data for hooks or other integrations."""
     return _build()
 
 
@@ -340,22 +350,18 @@ def get_talk_by_slug(slug: str) -> Optional[Talk]:
 
 
 def define_env(env):
-    """MkDocs Macros entry point."""
-
     @env.macro
     def dashboard_next_talk():
         data = _build()
         talk = data.get("next_talk")
         if not talk:
             return '<div class="admonition info"><p>No upcoming talk is scheduled.</p></div>'
-
         speakers = ", ".join(talk.speakers) if talk.speakers else "TBA"
         topics = ", ".join(talk.topics or talk.tags or []) if (talk.topics or talk.tags) else "N/A"
         link = talk.link or "#"
         iso = talk.iso_start or ""
         date_line = talk.date_str or "TBA"
         time_line = f" • {talk.time_str}" if talk.time_str else ""
-
         return f"""
 <section class="dashboard next-talk">
   <div class="card">
@@ -423,9 +429,7 @@ def define_env(env):
         data = _build()
         upcoming = data["upcoming"]
         past = data["past"]
-        lines: List[str] = []
-        lines.append("# Upcoming Sessions")
-        lines.append("")
+        lines: List[str] = ["# Upcoming Sessions", ""]
         if not upcoming:
             lines.append("No upcoming sessions are scheduled right now. Check back soon!")
         else:
@@ -438,16 +442,15 @@ def define_env(env):
                     lines.append(f"- **Time:** {_format_time(talk)} ({tz_display})")
                 if talk.speakers:
                     lines.append(f"- **Speakers:** {', '.join(talk.speakers)}")
-                if talk.topics or talk.tags:
-                    topics = talk.topics or talk.tags
+                topics = talk.topics or talk.tags
+                if topics:
                     lines.append(f"- **Topics:** {', '.join(topics)}")
                 if talk.status:
                     lines.append(f"- **Status:** {talk.status}")
                 if talk.link:
                     lines.append(f"- [View details]({talk.link})")
                 lines.append("")
-        lines.append("# Past Sessions")
-        lines.append("")
+        lines.extend(["# Past Sessions", ""])
         if not past:
             lines.append("No sessions delivered yet.")
         else:
@@ -455,11 +458,43 @@ def define_env(env):
                 lines.append(f"- **{_format_date(talk)} — {talk.title}**")
                 extras: List[str] = []
                 if talk.speakers:
-                    extras.append(f"Speakers: {', '.join(talk.speakers)}")
+                    extras.append("Speakers: " + ", ".join(talk.speakers))
                 if talk.link:
                     extras.append(f"[Resources]({talk.link})")
                 if extras:
-                    lines.append(f"  - {' | '.join(extras)}")
+                    lines.append("  - " + " | ".join(extras))
+        return "\n".join(lines)
+
+    @env.macro
+    def generate_past_index():
+        data = _build()
+        past = data["past"]
+        lines: List[str] = ["# Past Talks", ""]
+        if not past:
+            lines.append("No sessions delivered yet.")
+        else:
+            for talk in past:
+                date_label = _format_date(talk)
+                heading = f"{date_label} — {talk.title}"
+                link = talk.link or ""
+                if link.startswith("talks/"):
+                    link = link.split("/", 1)[1]
+                if link:
+                    lines.append(f"- **[{heading}]({link})**")
+                else:
+                    lines.append(f"- **{heading}**")
+                details: List[str] = []
+                if talk.speakers:
+                    details.append("Speakers: " + ", ".join(talk.speakers))
+                topics = talk.topics or talk.tags
+                if topics:
+                    details.append("Topics: " + ", ".join(topics))
+                if talk.resources:
+                    details.append("Resources available")
+                if talk.recording_url:
+                    details.append(f"[Recording]({talk.recording_url})")
+                if details:
+                    lines.append("  - " + " | ".join(details))
         return "\n".join(lines)
 
     return env

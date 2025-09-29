@@ -54,8 +54,7 @@ extra_javascript:
 
 nav:
   - Home: index.md
-  - Schedule: schedule.md
-  - Improvements: improvements.md
-  - Suggest a Topic: suggest.md
-  - Talks:
-      - "New L&D Format Kickoff (Nov 4, 2025)": talks/2025-11-04-new-ld-format.md
+  - Upcoming Talks: schedule.md
+  - Past Talks: talks/index.md
+  - Resources: resources.md
+  - Propose a Talk: suggest.md
