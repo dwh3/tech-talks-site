@@ -1,3 +1,6 @@
-mkdocs-material==9.6.21
+jupyter>=1.0
 mkdocs-macros-plugin==1.4.0
+mkdocs-material==9.6.21
+nbconvert>=7.10
 pydantic==2.11.9
+
