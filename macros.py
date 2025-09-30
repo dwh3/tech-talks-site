@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
+from lib.schedule_validation import validate_schedule_data
 
 ROOT = Path(__file__).resolve().parent
 DOCS = ROOT / "docs"
@@ -151,7 +152,11 @@ def _read_schedule() -> List[Talk]:
     for schedule_path in SCHEDULE_PATHS:
         if not schedule_path.exists():
             continue
-        data = _load_yaml(schedule_path) or {}
+        raw_data = _load_yaml(schedule_path)
+        if raw_data is None:
+            continue
+        validate_schedule_data(raw_data, schedule_path)
+        data = raw_data or {}
         sections: Dict[str, List[Dict[str, Any]]] = {}
         if isinstance(data, list):
             sections = {"mixed": data}

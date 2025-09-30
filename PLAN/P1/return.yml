@@ -1,0 +1,222 @@
+phase: P1 - Tech Stack & Architecture
+facts:
+  stack:
+    framework: MkDocs Material
+    versions:
+      mkdocs-material: 9.6.21
+      python: 3.10+
+    lang: Python
+    package_manager: pip
+  hosting:
+    provider: GitHub Pages
+    ci: GitHub Actions
+    cd: actions/deploy-pages workflow
+  paths:
+    pages:
+    - docs/
+    components: []
+    lib:
+    - hooks.py
+    - macros.py
+    - lib/generated_talks.py
+    - lib/schedule_validation.py
+    content:
+    - data/schedule.yml
+    - docs/
+    config:
+    - mkdocs.yml
+    - .github/workflows/deploy.yml
+  constraints:
+    routing_preserve: true
+    i18n: false
+    ssr: false
+bullets:
+- id: P1-B1
+  status: DONE
+  completed_at: '2025-09-30'
+  title: Pin Build Dependencies
+  summary: Unpinned MkDocs Material upgrades can silently alter layouts; lock versions
+    to stabilize builds.
+  scope_changes:
+  - Introduce constrained requirements for MkDocs + plugins
+  - '- Wider dependency cleanup'
+  repo_signals:
+    files:
+    - requirements.txt
+    - .github/workflows/deploy.yml
+    anchors: []
+    libraries:
+    - mkdocs-material
+    - mkdocs-macros-plugin
+  steps:
+  - Audit required MkDocs/material versions
+  - Add pinned requirements or lockfile
+  - Update CI to install pinned set
+  dependencies: []
+  risks_mitigations:
+  - Upstream security patches delayed -> schedule periodic dependency review
+  acceptance_criteria:
+  - CI installs deterministic versions documented in repo
+  validation_commands:
+  - pip install -r requirements.txt
+  - mkdocs build
+  effort: S
+  impact: M
+  evidence:
+  - path: requirements.txt
+    excerpt: 'mkdocs-material==9.6.21
+
+      mkdocs-macros-plugin==1.4.0
+
+      '
+- id: P1-B2
+  status: DONE
+  completed_at: '2025-09-30'
+  title: Modularize Build Hooks
+  summary: hooks.py mixes generation, rendering, and filesystem logic; partition to
+    improve testability and reuse.
+  scope_changes:
+  - Extract generation helpers into dedicated module
+  - Add docstrings outlining hook responsibilities
+  repo_signals:
+    files:
+    - hooks.py
+    - lib/generated_talks.py
+    anchors:
+    - on_files
+    - generate_missing_talk_pages
+  steps:
+  - Identify cohesive responsibilities inside hooks.py
+  - Split into modules under e.g. lib/generation
+  - Update imports and add inline docs
+  dependencies: []
+  risks_mitigations:
+  - Refactor may break generation -> add regression tests for generated talks
+  acceptance_criteria:
+  - Hooks layer depends on extracted helpers without duplicating logic
+  validation_commands:
+  - python -m unittest tests.test_generated_talks
+  - mkdocs build
+  effort: M
+  impact: M
+  evidence:
+  - path: hooks.py
+    excerpt: "generated = generate_missing_talk_pages(\n    schedule[\"talks\"],\n\
+      \    docs_dir,\n    site_dir,\n    files,\n    use_directory_urls,\n    GENERATED_DIR_NAME,\n\
+      )\n"
+  - path: tests/test_generated_talks.py
+    excerpt: "generated = generate_missing_talk_pages(\n    [talk],\n    self.docs_dir,\n\
+      \    self.site_dir,\n    files,\n    use_directory_urls=True,\n    dir_name=GENERATED_DIR_NAME,\n\
+      )\n"
+- id: P1-B3
+  title: Introduce Schedule Schema Validation
+  summary: schedule.yml lacks automated validation, risking broken macros when fields
+    change; add schema checks.
+  scope_changes:
+  - Define schema (e.g., Pydantic/Voluptuous) for talks
+  - Run validation in CI before build
+  repo_signals:
+    files:
+    - data/schedule.yml
+    - macros.py
+    - validate_schedule.py
+    - lib/schedule_validation.py
+    - .github/workflows/deploy.yml
+    anchors:
+    - _read_schedule
+    - validate_schedule_file
+    libraries:
+    - yaml
+    - pydantic
+  steps:
+  - Design JSON schema or Python model for talks
+  - Create validation script integrated with mkdocs build
+  - Wire into CI workflow
+  dependencies: []
+  risks_mitigations:
+  - Schema drift -> document update steps for content authors
+  acceptance_criteria:
+  - CI fails when schedule.yml violates required fields
+  validation_commands:
+  - python validate_schedule.py
+  - python -m unittest tests.test_schedule_validation
+  - mkdocs build
+  effort: M
+  impact: L
+  evidence:
+  - path: macros.py
+    excerpt: "        raw_data = _load_yaml(schedule_path)\n        if raw_data is\
+      \ None:\n            continue\n        validate_schedule_data(raw_data, schedule_path)"
+  - path: validate_schedule.py
+    excerpt: "    try:\n        validate_schedule_file(schedule_path)"
+  - path: tests/test_schedule_validation.py
+    excerpt: "        with self.assertRaises(ScheduleValidationError):\n         \
+      \   validate_schedule_data(payload, None)"
+  status: DONE
+  completed_at: '2025-09-30'
+- id: P1-B4
+  title: Clarify Macro Responsibilities
+  summary: macros.py conflates data loading, formatting, and template HTML; reorganize
+    to separate concerns and aid reuse.
+  scope_changes:
+  - Break macros.py into loader, formatters, macro exports
+  - '- HTML restyling'
+  repo_signals:
+    files:
+    - macros.py
+    anchors:
+    - _build
+    - dashboard_recent_talks
+    - generate_schedule
+    libraries:
+    - mkdocs-macros-plugin
+  steps:
+  - Group data access utilities into dedicated module
+  - Extract HTML builders to templates or Jinja partials
+  - Update macros registration to import smaller pieces
+  dependencies:
+  - P1-B2
+  risks_mitigations:
+  - Template regression -> add snapshot tests for generated sections
+  acceptance_criteria:
+  - Macro module exposes focused functions with minimal side effects
+  validation_commands:
+  - mkdocs build
+  effort: L
+  impact: M
+  evidence:
+  - path: macros.py
+    excerpt: "def generate_schedule():\n    data = _build()\n    upcoming = data[\"\
+      upcoming\"]\n    past = data[\"past\"]\n"
+- id: P1-B5
+  title: Document and Consolidate Assets
+  summary: Static assets span docs/assets and generated outputs; codify structure
+    to avoid collisions and ensure reuse.
+  scope_changes:
+  - Create README for assets with conventions
+  - Review extra_css/js references in mkdocs.yml
+  repo_signals:
+    files:
+    - mkdocs.yml
+    - docs/assets/dashboard.css
+    anchors:
+    - extra_css
+    - extra_javascript
+    libraries: []
+  steps:
+  - Inventory assets referenced in mkdocs.yml
+  - Define directory layout (css/js/images)
+  - Update documentation linking to conventions
+  dependencies: []
+  risks_mitigations:
+  - Unused assets lingering -> run asset linting periodically
+  acceptance_criteria:
+  - Asset organization documented and reflected in mkdocs.yml
+  validation_commands:
+  - mkdocs build
+  effort: S
+  impact: S
+  evidence:
+  - path: mkdocs.yml
+    excerpt: "extra_css:\n  - assets/dashboard.css\nextra_javascript:\n  - assets/countdown.js\n\
+      \  - assets/suggest.js\n"

@@ -1,0 +1,40 @@
+stack:
+  framework: MkDocs Material
+  language: Python
+  package_manager: pip
+  versions:
+    framework: "mkdocs-material==9.6.21"
+    language: "Python 3.10+"
+hosting:
+  provider: GitHub Pages
+  ci: GitHub Actions
+  cd: actions/deploy-pages workflow
+paths:
+  pages:
+    - docs/
+  components:
+    - "None identified; macros/templates render views dynamically"
+  lib:
+    - hooks.py
+    - macros.py
+  content:
+    - data/schedule.yml
+    - docs/
+  config:
+    - mkdocs.yml
+    - .github/workflows/deploy.yml
+constraints:
+  routing_preserve: true
+  auth: absent
+  i18n_ready: false
+libraries:
+  ui:
+    - mkdocs-material
+  styling:
+    - docs/assets/dashboard.css
+  testing:
+    - none (no automated test suites present)
+notes:
+  - Custom MkDocs hooks generate talk pages from schedule data.
+  - Macros plugin assembles dashboards and schedule content during build.
+  - Versions pinned in requirements.txt (2025-09-30) for reproducible builds.

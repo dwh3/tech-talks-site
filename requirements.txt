@@ -1,2 +1,3 @@
-﻿mkdocs-material
-mkdocs-macros-plugin
+mkdocs-material==9.6.21
+mkdocs-macros-plugin==1.4.0
+pydantic==2.11.9
