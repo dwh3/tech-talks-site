@@ -31,7 +31,7 @@ upcoming:
   duration: 45
   slug: 2025-11-18-sql-optimization
   speakers:
-  - name: John Smith
+  - name: David Hummel
     bio: Data Platform Lead
     avatar: images/speakers/john-smith.jpg
   topics:
@@ -57,7 +57,7 @@ past:
   date: 2019-05-01
   timezone: America/New_York
   speakers:
-  - name: Taylor Morgan
+  - name: David Hummel
     bio: Data Scientist
   tags:
   - Statistics
@@ -75,3 +75,4 @@ stats:
     count: 1
   - name: Statistics
     count: 1
+
